@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Models
 {
@@ -8,6 +9,6 @@ namespace TodoApi.Models
         public string? Mail { get; set; }
         public string? Password { get; set; }
         
-        public ICollection<TodoList>? TodoLists { get; set; }
+        public ICollection<TodoList>? TodoLists { get; } = new List<TodoList>();
     }
 }

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace TodoApi.Models
 {
@@ -7,9 +8,8 @@ namespace TodoApi.Models
         public int Id { get; set; }
         public string? Name { get; set; }
        
-        public int UserId { get; set; }       
-        [ForeignKey("UserId")]
-        public User? User { get; set; }
-        public ICollection<Item>? Items { get; set; }
+        //public int UserId { get; set; }       
+        //public User? User { get; set; }
+        public ICollection<Item> Items { get; } = new List<Item>();
     }
 }

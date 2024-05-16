@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using TodoApi.Models;
 
 
@@ -10,19 +11,6 @@ namespace TodoApi.Managers
         public ItemManager(ApiDbContext context)
         {
             _context = context;
-        }
-
-        public void InitContext()
-        {
-            if (_context.Item.Count() == 0)
-            {
-                _context.Item.Add(new Item { Content = "", IsComplete = true });
-                _context.Item.Add(new Item { Content = "", IsComplete = false });
-                _context.Item.Add(new Item { Content = "", IsComplete = false });
-                _context.Item.Add(new Item { Content = "", IsComplete = true });
-
-                _context.SaveChanges();
-            }
         }
 
         public IEnumerable<Item> GetAllItems()
