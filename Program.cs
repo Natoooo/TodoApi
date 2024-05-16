@@ -1,11 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using TodoApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 
-//builder.Services.AddDbContext<ApiDbContext>(options =>
-    //options.UseNpgsql(conn));
+builder.Services.AddDbContext<ApiDbContext>(options =>
+    options.UseNpgsql(conn));
 
 //builder.Services.AddTransient<TodoManager>();
 
