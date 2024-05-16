@@ -6,7 +6,7 @@ namespace TodoApi.Models
     {
         public int Id { get; set; }
         public string? Content { get; set; }
-        public Boolean isComplete { get; set; }
+        public Boolean IsComplete { get; set; }
        
         public int TodoListId { get; set; }
         [ForeignKey("TodoListId")]
