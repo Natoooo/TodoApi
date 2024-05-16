@@ -16,10 +16,10 @@ namespace TodoApi.Managers
         {
             if (_context.Item.Count() == 0)
             {
-                _context.Item.Add(new Item { Content = "", IsComplete = true, TodoListId = 1});
-                _context.Item.Add(new Item { Content = "", IsComplete = false, TodoListId = 1});
-                _context.Item.Add(new Item { Content = "", IsComplete = false, TodoListId = 1 });
-                _context.Item.Add(new Item { Content = "", IsComplete = true, TodoListId = 1 });
+                _context.Item.Add(new Item { Content = "", IsComplete = true });
+                _context.Item.Add(new Item { Content = "", IsComplete = false });
+                _context.Item.Add(new Item { Content = "", IsComplete = false });
+                _context.Item.Add(new Item { Content = "", IsComplete = true });
 
                 _context.SaveChanges();
             }
