@@ -21,8 +21,6 @@ internal class Program
         builder.Services.AddTransient<UserManager>();
         builder.Services.AddTransient<TokenManager>();
 
-        builder.Services.AddAuthorization();
-        builder.Services.AddAuthentication("Bearer").AddJwtBearer();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -38,12 +36,11 @@ internal class Program
             app.UseSwaggerUI();
         }
 
-
         app.UseHttpsRedirection();
-        app.UseAuthMiddleware();
-        app.UseAuthorization();
-        app.UseAuthentication();
 
+        app.UseRouting();
+
+        app.UseWhen(context => context.Request.Path != "/auth/login", builder => builder.UseAuthMiddleware() );
 
         app.MapControllers();
 

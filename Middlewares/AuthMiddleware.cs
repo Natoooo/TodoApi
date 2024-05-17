@@ -1,36 +1,35 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace TodoApi.Middlewares 
 {
     public class AuthMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ApiDbContext _context;
 
-        public AuthMiddleware(RequestDelegate next, ApiDbContext context)
+        public AuthMiddleware(RequestDelegate next)
         {
             _next = next;
-            _context = context;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext requestContext, ApiDbContext dbContext)
         {
-            var tokenString = context.Request.Headers["X-Authenticate"].FirstOrDefault();
-            if (!string.IsNullOrEmpty(tokenString))
-            {
-                var token = await _context.Token.Include(t => t.User).FirstAsync(t => t.Content == tokenString);
+            var tokenString = requestContext.Request.Headers["Authorization"].FirstOrDefault<string>();
 
-                if (token != null)
-                {
-                    context.Items["User"] = token.User;
-                }
+            Console.WriteLine(tokenString); 
+
+            var token = await dbContext.Token.Include(t => t.User).FirstOrDefaultAsync(t => t.Content == tokenString);
+
+            if (token == null) 
+            {
+                requestContext.Response.StatusCode = 401;
+                return;
             }
 
-            await _next(context);
+            requestContext.Items["User"] = token.User;
+            await _next(requestContext);
         }
     }
 

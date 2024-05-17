@@ -21,12 +21,7 @@ namespace TodoApi.Managers
 
         public Item? GetItemById(int id)
         {
-            var item = _context.Item.Find(id);
-
-            if (item == null)
-            return null;
-
-            return item;
+            return _context.Item.Find(id);
         }
 
         public Item? CreateItem(Item item)

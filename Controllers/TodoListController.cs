@@ -47,15 +47,12 @@ namespace TodoApi.Controllers
         public ActionResult<TodoList> PostTodoList(TodoList todoList)
         {
             Console.WriteLine("Create a new todoList");
-            var user = _tokenManager.Authenticate(Request);
-            if (user == null) return  Unauthorized();
 
-            if (user.Id == todoList.UserId) {
-                var newTodoList = _todoListManager.CreateTodoList(todoList);
-                return Ok(newTodoList);
-            } else {
-                return Unauthorized();
-            }
+            var user = (HttpContext.Items["User"] as User)!;
+            todoList.UserId = user.Id;
+            
+            var newTodoList = _todoListManager.CreateTodoList(todoList);
+            return Ok(newTodoList);
         }
 
         [HttpPut("{id}")]
