@@ -13,7 +13,7 @@ namespace TodoApi.Managers
         {
             _context = context;
         }
-        
+
 
         public IEnumerable<TodoList> GetAllTodoLists()
         {
@@ -31,7 +31,7 @@ namespace TodoApi.Managers
         }
 
         public TodoList? CreateTodoList(TodoList todoList)
-        {
+        {   
             _context.TodoList.Add(todoList);
             _context.SaveChanges();
             

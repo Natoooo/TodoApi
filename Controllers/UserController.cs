@@ -27,25 +27,10 @@ namespace TodoApi.Controllers
             return Ok(_userManager.GetAllUsers());
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<User> GetUser(int id)
-        {
-            Console.WriteLine("Getting a user");
-            var user = _userManager.GetUserById(id);
-
-            if (user == null)
-            {
-                Console.WriteLine("GetUserById NOT FOUND");
-                return NotFound();
-            }
-
-            return Ok(user);
-        }
-
         [HttpPost]
-        public ActionResult<User> PostUser(User user)
+        public ActionResult<User> SignUp(User user)
         {
-            Console.WriteLine("Create a new todoList");
+            Console.WriteLine("Create a new sign up");
             var newUser = _userManager.CreateUser(user);
             return Ok(newUser);
         }
@@ -56,13 +41,6 @@ namespace TodoApi.Controllers
             Console.WriteLine("Update user");
             var updatedUser = _userManager.UpdateUser(id, user);
             return Ok(updatedUser);
-        }
-
-        [HttpDelete("{id}")]
-        public void DeleteUser(int id)
-        {
-            Console.WriteLine("Delete user");
-            _userManager.DeleteUser(id);
         }
     }
 }

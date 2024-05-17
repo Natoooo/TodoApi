@@ -12,6 +12,7 @@ namespace TodoApi.Models
         public DbSet<Item> Item {get;set;}
         public DbSet<TodoList> TodoList {get;set;}
         public DbSet<User> User {get;set;}
+        public DbSet<Token> Token {get;set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

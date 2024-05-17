@@ -18,7 +18,10 @@ internal class Program
         builder.Services.AddTransient<ItemManager>();
         builder.Services.AddTransient<TodoListManager>();
         builder.Services.AddTransient<UserManager>();
+        builder.Services.AddTransient<TokenManager>();
 
+        builder.Services.AddAuthorization();
+        builder.Services.AddAuthentication("Bearer").AddJwtBearer();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
@@ -38,6 +41,8 @@ internal class Program
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
+        app.UseAuthentication();
+
 
         app.MapControllers();
 

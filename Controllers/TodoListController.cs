@@ -11,11 +11,13 @@ namespace TodoApi.Controllers
     {
         private readonly ApiDbContext _context;
         private readonly TodoListManager _todoListManager;
+        private readonly TokenManager _tokenManager;
 
-        public TodoListController(TodoListManager todoListManager, ApiDbContext context)
+        public TodoListController(TodoListManager todoListManager, TokenManager tokenManager, ApiDbContext context)
         {
             _context = context;
             _todoListManager = todoListManager;
+            _tokenManager = tokenManager;
         }
         
         [HttpGet]
@@ -45,8 +47,15 @@ namespace TodoApi.Controllers
         public ActionResult<TodoList> PostTodoList(TodoList todoList)
         {
             Console.WriteLine("Create a new todoList");
-            var newTodoList = _todoListManager.CreateTodoList(todoList);
-            return Ok(newTodoList);
+            var user = _tokenManager.Authenticate(Request);
+            if (user == null) return  Unauthorized();
+
+            if (user.Id == todoList.UserId) {
+                var newTodoList = _todoListManager.CreateTodoList(todoList);
+                return Ok(newTodoList);
+            } else {
+                return Unauthorized();
+            }
         }
 
         [HttpPut("{id}")]

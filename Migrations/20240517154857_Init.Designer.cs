@@ -11,7 +11,7 @@ using TodoApi.Models;
 namespace TodoApi.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20240517085933_Init")]
+    [Migration("20240517154857_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -69,6 +69,27 @@ namespace TodoApi.Migrations
                     b.ToTable("TodoList");
                 });
 
+            modelBuilder.Entity("TodoApi.Models.Token", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Token");
+                });
+
             modelBuilder.Entity("TodoApi.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -103,6 +124,17 @@ namespace TodoApi.Migrations
                 {
                     b.HasOne("TodoApi.Models.User", "User")
                         .WithMany("TodoLists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TodoApi.Models.Token", b =>
+                {
+                    b.HasOne("TodoApi.Models.User", "User")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

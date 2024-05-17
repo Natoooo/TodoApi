@@ -43,16 +43,6 @@ namespace TodoApi.Managers
             return _context.User.Include(x => x.TodoLists).ThenInclude(c => c.Items).ToList();
         }
 
-        public User? GetUserById(int id)
-        {
-            var user = _context.User.Find(id);
-
-            if (user == null)
-            return null;
-
-            return user;
-        }
-
         public User? CreateUser(User user)
         {
             _context.User.Add(user);
@@ -73,17 +63,6 @@ namespace TodoApi.Managers
             _context.SaveChanges();
             
            return user;
-        }
-
-        public void DeleteUser(int id)
-        {
-            var user = _context.User.Find(id);
-
-            if (user == null)
-                throw new Exception("User doesn't exist");
-
-            _context.User.Remove(user);
-            _context.SaveChanges();
-        }
+        }        
     }
 }
