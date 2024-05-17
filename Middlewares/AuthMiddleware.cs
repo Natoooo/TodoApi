@@ -4,42 +4,45 @@ using TodoApi.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
-
-public class AuthMiddleware
+namespace TodoApi.Middlewares 
 {
-    private readonly RequestDelegate _next;
-    private readonly ApiDbContext _context;
-
-    public AuthMiddleware(RequestDelegate next, ApiDbContext context)
+    public class AuthMiddleware
     {
-        _next = next;
-        _context = context;
-    }
+        private readonly RequestDelegate _next;
+        private readonly ApiDbContext _context;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        var tokenString = context.Request.Headers["X-Authenticate"].FirstOrDefault();
-        if (!string.IsNullOrEmpty(tokenString))
+        public AuthMiddleware(RequestDelegate next, ApiDbContext context)
         {
-            var token = await _context.Token.Include(t => t.User).FirstAsync(t => t.Content == tokenString);
-
-            if (token != null)
-            {
-                context.Items["User"] = token.User;
-            }
+            _next = next;
+            _context = context;
         }
 
-        await _next(context);
+        public async Task InvokeAsync(HttpContext context)
+        {
+            var tokenString = context.Request.Headers["X-Authenticate"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(tokenString))
+            {
+                var token = await _context.Token.Include(t => t.User).FirstAsync(t => t.Content == tokenString);
+
+                if (token != null)
+                {
+                    context.Items["User"] = token.User;
+                }
+            }
+
+            await _next(context);
+        }
+    }
+
+    public static class AuthMiddlewareExtensions
+    {
+        public static IApplicationBuilder UseAuthMiddleware(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<AuthMiddleware>();
+        }
     }
 }
 
-public static class AuthMiddlewareExtensions
-{
-    public static IApplicationBuilder UseAuthMiddleware(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<AuthMiddleware>();
-    }
-}
 
 /*           if (!HttpContext.Items.ContainsKey("User"))
                 return Unauthorized();

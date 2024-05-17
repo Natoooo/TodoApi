@@ -9,14 +9,14 @@ namespace TodoApi.Controllers
 {
     [ApiController]
     [Route("auth/")]
-    public class AuthController : ControllerBase
+    public class TokenController : ControllerBase
     {
         private readonly ApiDbContext _context;
         private readonly TokenManager _tokenManager;
 
         private readonly UserManager _userManager;
 
-        public AuthController(TokenManager tokenManager, UserManager userManager, ApiDbContext context)
+        public TokenController(TokenManager tokenManager, UserManager userManager, ApiDbContext context)
         {
             _context = context;
             _userManager = userManager;
@@ -34,8 +34,7 @@ namespace TodoApi.Controllers
 
             var token = new Token
             {
-                Content =  new JwtSecurityToken().ToString(),
-                //Guid.NewGuid().ToString()
+                Content =  Guid.NewGuid().ToString().ToString(),
                 User = user
             };
 

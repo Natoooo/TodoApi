@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Managers;
+using TodoApi.Middlewares;
 using TodoApi.Models;
 
 internal class Program
@@ -39,7 +40,7 @@ internal class Program
 
 
         app.UseHttpsRedirection();
-
+        app.UseAuthMiddleware();
         app.UseAuthorization();
         app.UseAuthentication();
 
