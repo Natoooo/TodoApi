@@ -21,8 +21,7 @@ namespace TodoApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Item>> GetItems()
         {
-
-            Console.WriteLine("Getting all items");
+            Console.WriteLine("Getting all items from Controller");
             return Ok(_itemManager.GetAllItems());
         }
 

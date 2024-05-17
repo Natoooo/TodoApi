@@ -17,6 +17,7 @@ internal class Program
 
         builder.Services.AddTransient<ItemManager>();
         builder.Services.AddTransient<TodoListManager>();
+        builder.Services.AddTransient<UserManager>();
 
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -39,8 +40,6 @@ internal class Program
         app.UseAuthorization();
 
         app.MapControllers();
-
-        //app.MapGet("/", () => "Hello World!");
 
         app.Run();
     }

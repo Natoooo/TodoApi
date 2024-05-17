@@ -15,6 +15,7 @@ namespace TodoApi.Managers
 
         public IEnumerable<Item> GetAllItems()
         {
+            Console.WriteLine("Getting all Items from Manager");
             return _context.Item.ToList();
         }
 
@@ -56,7 +57,7 @@ namespace TodoApi.Managers
             var item = _context.Item.Find(id);
 
             if (item == null)
-                throw(new Exception("Item doesn't exist"));
+                throw new Exception("Item doesn't exist");
 
             _context.Item.Remove(item);
             _context.SaveChanges();

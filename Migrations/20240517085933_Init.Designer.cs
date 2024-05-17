@@ -11,7 +11,7 @@ using TodoApi.Models;
 namespace TodoApi.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20240516204418_Init")]
+    [Migration("20240517085933_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -59,23 +59,65 @@ namespace TodoApi.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("TodoList");
+                });
+
+            modelBuilder.Entity("TodoApi.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("User");
                 });
 
             modelBuilder.Entity("TodoApi.Models.Item", b =>
                 {
                     b.HasOne("TodoApi.Models.TodoList", "TodoList")
                         .WithMany("Items")
-                        .HasForeignKey("TodoListId");
+                        .HasForeignKey("TodoListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("TodoList");
                 });
 
             modelBuilder.Entity("TodoApi.Models.TodoList", b =>
                 {
+                    b.HasOne("TodoApi.Models.User", "User")
+                        .WithMany("TodoLists")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TodoApi.Models.TodoList", b =>
+                {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("TodoApi.Models.User", b =>
+                {
+                    b.Navigation("TodoLists");
                 });
 #pragma warning restore 612, 618
         }

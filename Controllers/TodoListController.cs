@@ -16,7 +16,6 @@ namespace TodoApi.Controllers
         {
             _context = context;
             _todoListManager = todoListManager;
-            _todoListManager.InitContext();
         }
         
         [HttpGet]
