@@ -1,5 +1,5 @@
-using TodoApi.Managers;
 using Microsoft.AspNetCore.Mvc;
+using TodoApi.Middlewares;
 using TodoApi.Models;
 
 
@@ -10,26 +10,27 @@ namespace TodoApi.Controllers
     public class ItemController : ControllerBase
     {
         private readonly ApiDbContext _context;
-        private readonly ItemManager _itemManager;
 
-        public ItemController(ItemManager itemManager, ApiDbContext context)
+        public ItemController(ApiDbContext context)
         {
             _context = context;
-            _itemManager = itemManager;
         }
-        
+
+
         [HttpGet]
+        [AuthMiddleware]
         public ActionResult<IEnumerable<Item>> GetItems()
         {
-            Console.WriteLine("Getting all items from Controller");
-            return Ok(_itemManager.GetAllItems());
+            var user = HttpContext.Items["User"];
+            var items =_context.Item.ToList();
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
+        [AuthMiddleware]
         public ActionResult<Item> GetItem(int id)
         {
-            Console.WriteLine("Getting a item");
-            var item = _itemManager.GetItemById(id);
+            var item = _context.Item.Find(id);
 
             if (item == null)
             {
@@ -41,26 +42,40 @@ namespace TodoApi.Controllers
         }
 
         [HttpPost]
+        [AuthMiddleware]
         public ActionResult<Item> PostItem(Item item)
         {
-            Console.WriteLine("Create a new item");
-            var newItem = _itemManager.CreateItem(item);
+            var newItem = _context.Item.Add(item);
+            _context.SaveChanges();          
             return Ok(newItem);
         }
 
         [HttpPut("{id}")]
-        public ActionResult<Item> PutItem(int id, Item item)
+        [AuthMiddleware]
+        public ActionResult<Item>? PutItem(int id, Item modifiedItem)
         {
-            Console.WriteLine("Update item");
-            var updatedItem = _itemManager.UpdateItem(id, item);
-            return Ok(updatedItem);
+            var item = _context.Item.Find(id);
+            
+            if (item == null)
+                return null;
+            
+            item.Content = modifiedItem.Content;
+            item.IsComplete = modifiedItem.IsComplete;          
+            _context.SaveChanges();
+            return Ok(item);
         }
 
         [HttpDelete("{id}")]
+        [AuthMiddleware]
         public void DeleteItem(int id)
         {
-            Console.WriteLine("Delete item");
-            _itemManager.DeleteItem(id);
+            var item = _context.Item.Find(id);
+
+            if (item == null)
+                throw new Exception("Item doesn't exist");
+
+            _context.Item.Remove(item);
+            _context.SaveChanges();
         }
     }
 }

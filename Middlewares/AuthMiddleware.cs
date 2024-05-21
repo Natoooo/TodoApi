@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+/*using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
 
@@ -8,7 +8,6 @@ namespace TodoApi.Middlewares
     public class AuthMiddleware
     {
         private readonly RequestDelegate _next;
-
         public AuthMiddleware(RequestDelegate next)
         {
             _next = next;
@@ -40,7 +39,7 @@ namespace TodoApi.Middlewares
             return builder.UseMiddleware<AuthMiddleware>();
         }
     }
-}
+}*/
 
 
 /*           if (!HttpContext.Items.ContainsKey("User"))

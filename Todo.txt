@@ -1,24 +1,2 @@
-- créer un model token, champ content string not null et un userId
-- méthode sign up (create user) pour créer des users. Username et password
-
-- CreateToken
-    - Get email and password from requets body
-    - Get User model from DB by email
-    - Compare instance password with password from request body
-        - if != => return error (401)
-        - else
-            - create new Token instance
-            - set token content with a random string (alphanumeric)
-            - save the token
-            - return token to client
-
-- CreateList
-    - get token from http token from headers or query string
-    - fetch token from db
-    - if not found:
-        return error (403)
-    - else:
-        - fech user from db
-        - Desialize list from request body
-        - save to db
-        - return to client
+- How can access to the items of one particular todolist when I send Get Items ? I don't want to access to all the items of all todo list from that user.
+maybe Get api/items/2 for the items of the todolist with id = 2. But If I don't know the id maybe better with strings ? Get api/items/movies => movies as query params

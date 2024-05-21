@@ -1,6 +1,7 @@
-using TodoApi.Managers;
 using Microsoft.AspNetCore.Mvc;
 using TodoApi.Models;
+using Microsoft.EntityFrameworkCore;
+using TodoApi.Middlewares;
 
 
 namespace TodoApi.Controllers
@@ -10,64 +11,97 @@ namespace TodoApi.Controllers
     public class TodoListController : ControllerBase
     {
         private readonly ApiDbContext _context;
-        private readonly TodoListManager _todoListManager;
-        private readonly TokenManager _tokenManager;
 
-        public TodoListController(TodoListManager todoListManager, TokenManager tokenManager, ApiDbContext context)
+        public TodoListController(ApiDbContext context)
         {
             _context = context;
-            _todoListManager = todoListManager;
-            _tokenManager = tokenManager;
         }
         
-        [HttpGet]
-        public ActionResult<IEnumerable<TodoList>> GetTodoLists()
-        {
 
-            Console.WriteLine("Getting all todoLists");
-            return Ok(_todoListManager.GetAllTodoLists());
+        [HttpGet]
+        [AuthMiddleware]
+        public ActionResult<IEnumerable<TodoList>>? GetTodoLists()
+        {
+            User? user = HttpContext.Items["User"] as User;
+
+            if (user == null)
+                return null;
+
+            //var todoLists = _context.TodoList.Include(x => x.Items).ToList();
+            List<TodoList> todoLists = _context.TodoList.Include(x => x.Items).Where(x => x.UserId == user.Id).ToList();
+            return Ok(todoLists);
         }
 
         [HttpGet("{id}")]
-        public ActionResult<TodoList> GetTodoList(int id)
+        [AuthMiddleware]
+        public ActionResult<TodoList>? GetTodoList(int id)
         {
-            Console.WriteLine("Getting a todoList");
-            var todoList = _todoListManager.GetTodoListById(id);
+            User? user = HttpContext.Items["User"] as User;
 
+            if (user == null)
+                return null;
+
+            TodoList? todoList= _context.TodoList.Find(id);
+            
             if (todoList == null)
             {
-                Console.WriteLine("GetTodListById NOT FOUND");
+                Console.WriteLine("GetTodoListById NOT FOUND");
                 return NotFound();
             }
 
+            if (todoList.UserId != user.Id )
+                return Unauthorized();
+            
+            _context.TodoList.Include(x => x.Items).ToList();
             return Ok(todoList);
         }
 
         [HttpPost]
-        public ActionResult<TodoList> PostTodoList(TodoList todoList)
+        [AuthMiddleware]
+        public ActionResult<TodoList>? PostTodoList(TodoList todoList)
         {
-            Console.WriteLine("Create a new todoList");
+            User? user = HttpContext.Items["User"] as User;
+            
+            if (user == null)    
+                return null;
+            
+            _context.TodoList.Add(todoList);
+            
+            if (todoList.UserId != user.Id )
+                return Unauthorized();
 
-            var user = (HttpContext.Items["User"] as User)!;
+            
             todoList.UserId = user.Id;
             
-            var newTodoList = _todoListManager.CreateTodoList(todoList);
-            return Ok(newTodoList);
+            _context.SaveChanges();
+            return Ok(todoList);
         }
 
         [HttpPut("{id}")]
-        public ActionResult<TodoList> PutTodoList(int id, TodoList todoList)
+        [AuthMiddleware]
+        public ActionResult<TodoList>? PutTodoList(int id, TodoList modifiedTodoList)
         {
-            Console.WriteLine("Update todoList");
-            var updatedTodoList = _todoListManager.UpdateTodoList(id, todoList);
-            return Ok(updatedTodoList);
+            var todoList = _context.TodoList.Find(id);
+            
+            if (todoList == null)
+                return null;
+            
+            todoList.Name = modifiedTodoList.Name;           
+            _context.SaveChanges();
+            return Ok(todoList);
         }
 
         [HttpDelete("{id}")]
+        [AuthMiddleware]
         public void DeleteTodoList(int id)
         {
-            Console.WriteLine("Delete todoList");
-            _todoListManager.DeleteTodoList(id);
+            var todoList = _context.TodoList.Find(id);
+
+            if (todoList == null)
+                throw new Exception("TodoList doesn't exist");
+
+            _context.TodoList.Remove(todoList);
+            _context.SaveChanges();
         }
     }
 }

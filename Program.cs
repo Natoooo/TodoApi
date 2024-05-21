@@ -1,6 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using TodoApi.Managers;
-using TodoApi.Middlewares;
 using TodoApi.Models;
 
 internal class Program
@@ -10,19 +8,20 @@ internal class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddNewtonsoftJson(options =>
+        {
+            //options.JsonSerializerOptions.MaxDepth = 128; // You can increase the maximum depth if necessary
+            //options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            //options.SerializerSettings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects;
+            //options.JsonSerializerOptions.IgnoreReadOnlyProperties = true;
+        });
+        
         var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 
         builder.Services.AddDbContext<ApiDbContext>(options =>
             options.UseNpgsql(conn));
 
-        builder.Services.AddTransient<ItemManager>();
-        builder.Services.AddTransient<TodoListManager>();
-        builder.Services.AddTransient<UserManager>();
-        builder.Services.AddTransient<TokenManager>();
-
-
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -40,7 +39,7 @@ internal class Program
 
         app.UseRouting();
 
-        app.UseWhen(context => context.Request.Path != "/auth/login", builder => builder.UseAuthMiddleware() );
+        //app.UseWhen(context => context.Request.Path != "/auth/login", builder => builder.UseAuthMiddleware() );
 
         app.MapControllers();
 

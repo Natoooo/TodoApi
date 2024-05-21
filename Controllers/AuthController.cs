@@ -1,8 +1,7 @@
-using TodoApi.Managers;
 using Microsoft.AspNetCore.Mvc;
 using TodoApi.Models;
-using System.IdentityModel.Tokens.Jwt;
 using Microsoft.EntityFrameworkCore;
+using TodoApi.Middlewares;
 
 
 namespace TodoApi.Controllers
@@ -12,15 +11,10 @@ namespace TodoApi.Controllers
     public class TokenController : ControllerBase
     {
         private readonly ApiDbContext _context;
-        private readonly TokenManager _tokenManager;
 
-        private readonly UserManager _userManager;
-
-        public TokenController(TokenManager tokenManager, UserManager userManager, ApiDbContext context)
+        public TokenController(ApiDbContext context)
         {
             _context = context;
-            _userManager = userManager;
-            _tokenManager = tokenManager;
         }
         
         
@@ -45,17 +39,20 @@ namespace TodoApi.Controllers
         }
 
         [HttpDelete, Route("Logout")]
+        [AuthMiddleware]
         public ActionResult Logout()
         {
-            var user = _tokenManager.Authenticate(Request);         
-            if (user == null) return  Unauthorized();
+            var user = _context.User.FirstOrDefault();        
+            if (user == null)
+                return  Unauthorized();
 
             var token = _context.Token.FirstOrDefault(t => t.UserId == user.Id);
-            if (token == null) return NotFound();
+            
+            if (token == null)
+                return NotFound();
 
             _context.Token.Remove(token);
             _context.SaveChanges();
-
             return Ok();
         }
     }
