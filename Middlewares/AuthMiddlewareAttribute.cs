@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 using TodoApi.Models;
+
 
 namespace TodoApi.Middlewares
 {
@@ -22,6 +21,7 @@ namespace TodoApi.Middlewares
             {
                 _dbContext = dbContext;
             }
+
 
             public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
             {

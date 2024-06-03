@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
 
@@ -10,13 +11,11 @@ internal class Program
         // Add services to the container.
         builder.Services.AddControllers().AddNewtonsoftJson(options =>
         {
-            //options.JsonSerializerOptions.MaxDepth = 128; // You can increase the maximum depth if necessary
-            //options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            //options.SerializerSettings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.Objects;
-            //options.JsonSerializerOptions.IgnoreReadOnlyProperties = true;
         });
         
+        builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
         var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 
         builder.Services.AddDbContext<ApiDbContext>(options =>

@@ -11,10 +11,12 @@ namespace TodoApi.Controllers
     public class TodoListController : ControllerBase
     {
         private readonly ApiDbContext _context;
+        private readonly ILogger<TodoListController> _logger;
 
-        public TodoListController(ApiDbContext context)
+        public TodoListController(ApiDbContext context, ILogger<TodoListController> logger)
         {
             _context = context;
+            _logger = logger;
         }
         
 
@@ -25,10 +27,12 @@ namespace TodoApi.Controllers
             User? user = HttpContext.Items["User"] as User;
 
             if (user == null)
-                return null;
+            {
+                _logger.LogDebug("User is null in GetTodoLists");
+                return Forbid();
+            }
 
-            //var todoLists = _context.TodoList.Include(x => x.Items).ToList();
-            List<TodoList> todoLists = _context.TodoList.Include(x => x.Items).Where(x => x.UserId == user.Id).ToList();
+            List<TodoList> todoLists = _context.TodoList.Where(x => x.UserId == user.Id).ToList();           
             return Ok(todoLists);
         }
 
@@ -39,69 +43,90 @@ namespace TodoApi.Controllers
             User? user = HttpContext.Items["User"] as User;
 
             if (user == null)
-                return null;
-
-            TodoList? todoList= _context.TodoList.Find(id);
-            
-            if (todoList == null)
             {
-                Console.WriteLine("GetTodoListById NOT FOUND");
-                return NotFound();
+                _logger.LogDebug("User is null in GetTodoList");
+                return Forbid();
             }
-
-            if (todoList.UserId != user.Id )
-                return Unauthorized();
+                
+            TodoList? todoList = _context.TodoList.FirstOrDefault(tl => tl.Id == id);
             
+            if (todoList?.UserId != user.Id )
+            {
+                _logger.LogDebug($"Unauthorized access attempt to TodoList {todoList?.Id} by User {user.Id}");
+                return Unauthorized();
+
+            }
+                
             _context.TodoList.Include(x => x.Items).ToList();
             return Ok(todoList);
         }
 
         [HttpPost]
         [AuthMiddleware]
-        public ActionResult<TodoList>? PostTodoList(TodoList todoList)
+        public ActionResult<TodoList>? PostTodoList([FromBody] TodoList todoList)
         {
             User? user = HttpContext.Items["User"] as User;
             
-            if (user == null)    
-                return null;
-            
-            _context.TodoList.Add(todoList);
-            
-            if (todoList.UserId != user.Id )
-                return Unauthorized();
-
+            if (user == null)
+            {
+                _logger.LogDebug("User is null in PostTodoList");
+                return Forbid();
+            }   
             
             todoList.UserId = user.Id;
-            
+            _context.TodoList.Add(todoList);            
             _context.SaveChanges();
             return Ok(todoList);
         }
 
         [HttpPut("{id}")]
         [AuthMiddleware]
-        public ActionResult<TodoList>? PutTodoList(int id, TodoList modifiedTodoList)
+        public ActionResult<TodoList>? PutTodoList(int id, [FromBody] TodoList modifiedTodoList)
         {
-            var todoList = _context.TodoList.Find(id);
-            
-            if (todoList == null)
-                return null;
-            
-            todoList.Name = modifiedTodoList.Name;           
+            User? user = HttpContext.Items["User"] as User;
+
+            if (user == null)
+            {
+                _logger.LogDebug("User is null in PutTodoList");
+                return Forbid();
+            }
+
+            TodoList? todoList = _context.TodoList.FirstOrDefault(tl => tl.Id == id);
+
+            if (todoList?.UserId != user.Id)
+            {
+                _logger.LogDebug($"Unauthorized update attempt to TodoList {todoList?.Id} by User {user.Id}");
+                return Forbid();
+            }
+
+            todoList.Name = modifiedTodoList.Name;
             _context.SaveChanges();
             return Ok(todoList);
         }
 
         [HttpDelete("{id}")]
         [AuthMiddleware]
-        public void DeleteTodoList(int id)
+        public IActionResult DeleteTodoList(int id)
         {
-            var todoList = _context.TodoList.Find(id);
+            User? user = HttpContext.Items["User"] as User;
 
-            if (todoList == null)
-                throw new Exception("TodoList doesn't exist");
+            if (user == null)
+            {
+                _logger.LogDebug("User is null in DeleteTodoList");
+                return Forbid();
+            }
+
+            TodoList? todoList = _context.TodoList.FirstOrDefault(tl => tl.Id == id);
+
+            if (todoList?.UserId != user.Id)
+            {
+                _logger.LogDebug($"Unauthorized update attempt to TodoList {todoList?.Id} by User {user.Id}");
+                return Forbid();
+            }
 
             _context.TodoList.Remove(todoList);
             _context.SaveChanges();
+            return NoContent();
         }
     }
 }

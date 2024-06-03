@@ -14,19 +14,16 @@ namespace TodoApi.Models
         public DbSet<User> User {get;set;}
         public DbSet<Token> Token {get;set;}
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // modelBuilder.Entity<User>()
-            //     .HasMany(e => e.TodoLists)
-            //     .WithOne(e => e.User)
-            //     .HasForeignKey(e => e.UserId)
-            //     .IsRequired(false);
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
 
-            // modelBuilder.Entity<TodoList>()
-            //     .HasMany(e => e.Items)
-            //     .WithOne(e => e.TodoList)
-            //     .HasForeignKey(e => e.TodoListId)
-            //     .IsRequired(false);
+            modelBuilder.Entity<Token>()
+                .HasIndex(t => t.Content)
+                .IsUnique();
         }
     }
 }

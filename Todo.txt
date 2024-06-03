@@ -1,2 +1,1 @@
-- How can access to the items of one particular todolist when I send Get Items ? I don't want to access to all the items of all todo list from that user.
-maybe Get api/items/2 for the items of the todolist with id = 2. But If I don't know the id maybe better with strings ? Get api/items/movies => movies as query params
+- GET /items?todolist_id=2

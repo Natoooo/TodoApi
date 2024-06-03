@@ -11,7 +11,7 @@ using TodoApi.Models;
 namespace TodoApi.Migrations
 {
     [DbContext(typeof(ApiDbContext))]
-    [Migration("20240517154857_Init")]
+    [Migration("20240524135708_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -85,6 +85,9 @@ namespace TodoApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Content")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Token");
@@ -101,10 +104,13 @@ namespace TodoApi.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("User");
                 });

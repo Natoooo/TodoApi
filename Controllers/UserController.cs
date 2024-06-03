@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using TodoApi.Models;
-using Microsoft.EntityFrameworkCore;
 using TodoApi.Middlewares;
+using TodoApi.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 
 namespace TodoApi.Controllers
@@ -11,76 +12,60 @@ namespace TodoApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApiDbContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(ApiDbContext context)
+        public UserController(ApiDbContext context, IPasswordHasher<User> passwordHasher, ILogger<UserController> logger)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
+            _logger = logger;
         }
 
-        public void InitContext()
-        {
-            if (_context.User.Count() == 0)
-            {
-                _context.User.Add(new User { Email = "lana.prout@gmail.com", Password = "proutprout", TodoLists = {
-                    new TodoList { Name = "Movies", Items = { 
-                        new Item { Content = "Titanic", IsComplete = true },
-                        new Item { Content = "Rambo", IsComplete = false },
-                        new Item { Content = "Forest Gump", IsComplete = true }}},
-                    new TodoList { Name = "Travels", Items = { 
-                        new Item { Content = "Malaisia", IsComplete = true },
-                        new Item { Content = "Costa Rica", IsComplete = false },
-                        new Item { Content = "Bali", IsComplete = true }}}}}); 
-
-                _context.User.Add(new User { Email = "alfredo.pipi@gmail.com", Password = "pipipipi", TodoLists = {
-                    new TodoList { Name = "Desserts", Items = { 
-                        new Item { Content = "Tiramisu", IsComplete = true },
-                        new Item { Content = "Cheesecake", IsComplete = false },
-                        new Item { Content = "Brownie", IsComplete = true }}}}});
-                
-                _context.SaveChanges();
-            }
-        }
-
-
-        [HttpGet]
-        public ActionResult<IEnumerable<User>> GetUsers()
-        {
-            var users = _context.User.Include(x => x.TodoLists).ThenInclude(c => c.Items).ToList();
-            return Ok(users);
-        }
 
         [HttpPost]
-        public ActionResult<User> SignUp(User user)
-        {
-            var newUser = _context.User.Add(user);
-            _context.SaveChanges();
-            return Ok(newUser);
-        }
+        public ActionResult<User>? SignUp(UserRegistrationViewModel userRegistration)
+        {   
+            if (userRegistration.Password == null)
+            {
+                _logger.LogDebug($"Password is null for email {userRegistration.Email}");
+                return Forbid();
+            }
 
-        [HttpPut("{id}")]
-        [AuthMiddleware]
-        public ActionResult<User>? PutUser(int id, User modifiedUser)
-        {
-            var user = _context.User.Find(id);
-            
-            if (user == null)
-                return null;
-            
-            user.Email = modifiedUser.Email;           
+            User? user = new User
+            {
+                Email = userRegistration.Email
+            };
+            user.PasswordHash = _passwordHasher.HashPassword(user, userRegistration.Password);
+
+            _context.User.Add(user);
             _context.SaveChanges();
             return Ok(user);
         }
 
-        [HttpDelete("{id}")]
-        public void DeleteUser(int id)
+        [HttpPut("{id}")]
+        [AuthMiddleware]
+        public ActionResult<User>? PutUser(int id, [FromBody] User modifiedUser)
         {
-            var user = _context.User.Find(id);
+            User? currentUser = HttpContext.Items["User"] as User;
+
+            if (currentUser == null || currentUser.Id != id)
+            {
+                _logger.LogDebug($"Unauthorized access attempt by user ID {currentUser?.Id}");
+                return Forbid();
+            }
+
+            var user = _context.User.FirstOrDefault(u => u.Id == id);
 
             if (user == null)
-                throw new Exception("TodoList doesn't exist");
+            {
+                _logger.LogDebug($"User with ID {id} not found");
+                return Forbid();
+            }
 
-            _context.User.Remove(user);
+            user.Email = modifiedUser.Email;
             _context.SaveChanges();
+            return Ok(user);
         }
     }
 }
